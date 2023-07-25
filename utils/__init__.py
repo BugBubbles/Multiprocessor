@@ -5,3 +5,4 @@ from .decorator import *
 
 from ..utils.type_eq import *
 from ..utils.type_eq import mathml2latex_yarosh as ml2tex
+from .exceptions import *

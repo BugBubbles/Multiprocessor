@@ -1,17 +1,6 @@
 from typing import Callable
+from . import NoSplitError, BadFormatWarning
 import warnings
-
-
-class BadFormatWarning(Warning):
-    pass
-
-
-class SmallBatchWarning(Warning):
-    pass
-
-
-class NoSplitError(BaseException):
-    pass
 
 
 def bi_div_num(func):
