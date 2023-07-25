@@ -1,64 +1,34 @@
-from typing import Callable
-from . import NoSplitError, BadFormatWarning
+from typing import Callable, List, Dict, Iterator, Union, Any
+from . import NoSplitError, BadFormatWarning, DataShips
 import warnings
+from functools import wraps
 
 
-def bi_div_num(func):
-    """
-    divide into 2 parts.
-    """
+def producer_typer(producer: Callable[[int, Any], DataShips]):
+    """test whether the producer function is valid or not"""
 
-    def warp(*args, **kwargs):
-        splits = func(*args, **kwargs)
-
+    @wraps
+    def warpper(id_proc: int, *producer_args, **producer_kwargs) -> DataShips:
+        assert id_proc
         try:
-            if len(splits) < 3:
-                raise NoSplitError("No divident flags was found in this text!")
-            elif len(splits) > 3:
-                warnings.warn(
-                    "This text was going to be divided more than two parts, we only reserve the first two items. Here is the raw text:\n----------------->>>>>\n{}\n<<<<<<<<--------------".format(
-                        "\n".join(splits)
-                    ),
-                    BadFormatWarning,
-                )
-        except Exception as exc:
-            print(exc)
-            raise Exception
+            return producer(id_proc=id_proc, *producer_args, **producer_kwargs)
+        except:
+            raise TypeError("Not a valid input arguments type.")
 
-        return splits
-
-    return warp
+    return warpper
 
 
-def div_num(func):
-    """
-    divide into 2 or more parts
-    """
+def consumer_typer(consumer: Callable[[DataShips, int, Any], Any]):
+    """test whether the consumer function is valid or not"""
 
-    def warp(*args, **kwargs):
-        splits = func(*args, **kwargs)
+    @wraps
+    def warpper(data_ships: DataShips, id_proc: int, *consumer_args, **consumer_kwargs):
+        assert id_proc and data_ships
         try:
-            if len(splits) < 2:
-                raise NoSplitError("No divident flags was found in this text!")
-        except Exception as exc:
-            print(exc)
-            raise Exception
-        return splits
+            return consumer(
+                data_ships, id_proc=id_proc, *consumer_args, **consumer_kwargs
+            )
+        except:
+            raise TypeError("Not a valid input arguments type.")
 
-    return warp
-
-
-def input_func(func):
-    def warp(arg_func: Callable, *fn_args, **fn_kwargs):
-        output = func(arg_func, *fn_args, **fn_kwargs)
-        return output
-
-    return warp
-
-
-def input_class(func):
-    def warp(arg_class, *init_args, **init_kwargs):
-        output = func(arg_class, *init_args, **init_kwargs)
-        return output
-
-    return warp
+    return warpper
