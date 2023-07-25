@@ -43,7 +43,7 @@ class MultipleExecutor(ExecutorBase):
         print(
             f"\n===================== Produce process {id_proc:03d}:{__name__} is now working ====================="
         )
-        for ships in self.producer(**producer_kwargs):
+        for ships in self.producer(id_proc=id_proc,**producer_kwargs):
             while self.quene.full():
                 print(
                     f"\nQuene is full, read process {id_proc:03d}:{__name__} now rests..."

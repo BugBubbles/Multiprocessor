@@ -5,7 +5,7 @@ from ..utils import SmallBatchWarning
 
 class SingleExecutor(ExecutorBase):
     def __call__(self, **kwargs):
-        ships = self.producer(**self.producer_kwargs)
+        ships = self.producer(id_proc=0, **self.producer_kwargs)
         if len(ships) < 10:
             warnings.warn(
                 "The small batch of input files is deprecated",
@@ -13,4 +13,4 @@ class SingleExecutor(ExecutorBase):
                 **kwargs
             )
 
-        self.consumer(ships, **self.consumer_kwargs)
+        self.consumer(ships, id_proc=0, **self.consumer_kwargs)
