@@ -1,5 +1,5 @@
 import os
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Generator
 import tqdm
 import itertools
 
@@ -34,10 +34,10 @@ def get_file_list(
     file_dir: os.PathLike, file_suffix: str, input_file_path_list: Optional[str] = None
 ) -> List[os.PathLike]:
     """
-    Arguments:
-     - `file_dir` : 包含全部文件的大目录
-     - `input_file_path_list` : 全部文件的路径，按逗号分隔
-     - `file_suffix` : 后缀名
+    ### Arguments:
+     - `file_dir` : the root directory of whole files
+     - `file_suffix` : each files' suffix, for example '.docx'
+     - `input_file_path_list` : a list of completely mapped file paths to the files
     """
     file_list = []
     if input_file_path_list == None:
@@ -58,13 +58,13 @@ def get_file_list_stream(
     file_dir: os.PathLike,
     file_suffix: str,
     input_file_path_list: Optional[List[str]] = None,
-):
+) -> Generator[os.PathLike, Any, Any]:
     """
     scan the whole file by a streaming process to save computer resource.
-    Arguments:
-     - `file_dir` : 包含全部文件的大目录
-     - `input_file_path_list` : 全部文件的路径，按逗号分隔
-     - `file_suffix` : 后缀名
+    ### Arguments:
+     - `file_dir` : the root directory of whole files
+     - `file_suffix` : each files' suffix, for example '.docx'
+     - `input_file_path_list` : a list of completely mapped file paths to the files
     """
     if input_file_path_list == None:
         for f_dir, _, f_list in tqdm.tqdm(
@@ -83,14 +83,14 @@ def get_file_list_stream_batch(
     file_suffix: str,
     input_file_path_list: Optional[List[str]] = None,
     batch_size: Optional[int] = 300,
-):
+) -> Generator[List[os.PathLike], List, List]:
     """
     scan the whole file by a streaming process to save computer resource, yield batches by customized size.
-    Arguments:
-     - `file_dir` : 包含全部文件的大目录
-     - `input_file_path_list` : 全部文件的路径，按逗号分隔
-     - `file_suffix` : 后缀名
+    ### Arguments:
+     - `file_dir` : the root directory of whole files
+     - `file_suffix` : each files' suffix, for example '.docx'
      - `batch_size` : the customizable batch size for user.
+     - `input_file_path_list` : a list of completely mapped file paths to the files
     """
     if batch_size < 1:
         raise ValueError("batch_size must be at least one")
@@ -99,7 +99,39 @@ def get_file_list_stream_batch(
         yield batch
 
 
+def get_file_list_stream_id(
+    file_dir: os.PathLike,
+    file_suffix: str,
+    id_proc: int = 0,
+    num_proc: int = 1,
+    input_file_path_list: Optional[List[str]] = None,
+) -> Generator[os.PathLike, Any, Any]:
+    """
+    get file paths from a specified file directory, spliting to several threads of generator in accordence with `id_proc` and `total_num` arguments.
+    ### Arguments:
+     - `file_dir` : the root directory of whole files
+     - `file_suffix` : each files' suffix, for example '.docx'
+     - `id_proc` : contemporary index of generator.
+     - `num_proc` : total number of generators.
+     - `input_file_path_list` : a list of completely mapped file paths to the files
+    """
+    yield from itertools.islice(
+        get_file_list_stream(file_dir, file_suffix, input_file_path_list),
+        id_proc,
+        None,
+        num_proc,
+    )
+
+
 if __name__ == "__main__":
-    test_dir = "/workspace/docx2md/docx_converter"
-    for lines in get_file_list_stream_batch(test_dir, ".py",batch_size=10):
-        print(lines)
+    # test_dir = "/dataset_goosefs/cos_shanghai_1/raw_datasets/books/baidu/"
+    test_dir = "/workspace/tmp"
+    num_proc = 4
+    gens = [
+        get_file_list_stream_id(test_dir, ".jsonl", id_proc, num_proc)
+        for id_proc in range(num_proc)
+    ]
+    for gen in gens:
+        print(f"this is thread {gen.__name__}:{gen.gi_frame.f_locals}")
+        lines = [line for line in gen]
+        print(*lines)
