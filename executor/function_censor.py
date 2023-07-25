@@ -1,3 +1,4 @@
+"""use for testing the input arguments type"""
 from typing import Callable
 from functools import wraps
 

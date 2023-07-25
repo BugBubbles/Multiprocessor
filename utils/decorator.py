@@ -1,15 +1,16 @@
-from typing import Callable, List, Dict, Iterator, Union, Any
-from . import NoSplitError, BadFormatWarning, DataShips
-import warnings
+from typing import Callable, List, Dict, Iterable, Union, Any
+# from .exceptions import NoSplitError, BadFormatWarning
+from .type_collector import DataShips
+# import warnings
 from functools import wraps
 
 
-def producer_typer(producer: Callable[[int, Any], DataShips]):
+def producer_typer(producer: Callable[[int, Any], Iterable[DataShips]]):
     """test whether the producer function is valid or not"""
 
-    @wraps
-    def warpper(id_proc: int, *producer_args, **producer_kwargs) -> DataShips:
-        assert id_proc
+    @wraps(producer)
+    def warpper(id_proc: int, *producer_args, **producer_kwargs) -> Iterable[DataShips]:
+        assert isinstance(id_proc, int)
         try:
             return producer(id_proc=id_proc, *producer_args, **producer_kwargs)
         except:
@@ -21,7 +22,7 @@ def producer_typer(producer: Callable[[int, Any], DataShips]):
 def consumer_typer(consumer: Callable[[DataShips, int, Any], Any]):
     """test whether the consumer function is valid or not"""
 
-    @wraps
+    @wraps(consumer)
     def warpper(data_ships: DataShips, id_proc: int, *consumer_args, **consumer_kwargs):
         assert id_proc and data_ships
         try:

@@ -1,5 +1,5 @@
 import os
-from typing import List, Any, Optional, Generator
+from typing import List, Any, Optional, Generator, Iterable
 import tqdm
 import itertools
 
@@ -78,10 +78,8 @@ def get_file_list_stream(
             yield from get_file_list_stream(sub_file, file_suffix)
 
 
-def get_file_list_stream_batch(
-    file_dir: os.PathLike,
-    file_suffix: str,
-    input_file_path_list: Optional[List[str]] = None,
+def generator_batch(
+    generator: Iterable[Any],
     batch_size: Optional[int] = 300,
 ) -> Generator[List[os.PathLike], List, List]:
     """
@@ -94,7 +92,7 @@ def get_file_list_stream_batch(
     """
     if batch_size < 1:
         raise ValueError("batch_size must be at least one")
-    it = iter(get_file_list_stream(file_dir, file_suffix, input_file_path_list))
+    it = iter(generator)
     while batch := tuple(itertools.islice(it, batch_size)):
         yield batch
 
