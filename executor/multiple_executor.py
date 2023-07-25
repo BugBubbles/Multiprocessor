@@ -38,12 +38,11 @@ class MultipleExecutor(ExecutorBase):
         self.consumer_pool_kwargs = consumer_pool_kwargs
         self.producer_pool_args = producer_pool_args
 
-
     def _produce(self, id_proc: int, **producer_kwargs) -> None:
         print(
             f"\n===================== Produce process {id_proc:03d}:{__name__} is now working ====================="
         )
-        for ships in self.producer(id_proc=id_proc,**producer_kwargs):
+        for ships in self.producer(id_proc=id_proc, **producer_kwargs):
             while self.quene.full():
                 print(
                     f"\nQuene is full, read process {id_proc:03d}:{__name__} now rests..."
@@ -73,7 +72,7 @@ class MultipleExecutor(ExecutorBase):
             print(
                 f"\n===================== Consume process {id_proc:03d}:{__name__} is now working ====================="
             )
-            self.consumer(file_list=ships, id_proc=id_proc, **consumer_kwargs)
+            self.consumer(data_ships=ships, id_proc=id_proc, **consumer_kwargs)
             print(
                 f"\n================ Consume process {id_proc:03d}:{__name__} finishes, waiting for next boot ================"
             )

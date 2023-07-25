@@ -1,6 +1,8 @@
 from typing import Callable, List, Dict, Iterable, Union, Any
+
 # from .exceptions import NoSplitError, BadFormatWarning
 from .type_collector import DataShips
+
 # import warnings
 from functools import wraps
 
@@ -25,9 +27,14 @@ def consumer_typer(consumer: Callable[[DataShips, int, Any], Any]):
     @wraps(consumer)
     def warpper(data_ships: DataShips, id_proc: int, *consumer_args, **consumer_kwargs):
         assert id_proc and data_ships
+        assert isinstance(id_proc, int)
+        assert isinstance(data_ships, Iterable)
         try:
             return consumer(
-                data_ships, id_proc=id_proc, *consumer_args, **consumer_kwargs
+                data_ships=data_ships,
+                id_proc=id_proc,
+                *consumer_args,
+                **consumer_kwargs
             )
         except:
             raise TypeError("Not a valid input arguments type.")
