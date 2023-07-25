@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Any
 from .executor import ExecutorBase
 import multiprocessing as mp
 import time
@@ -38,16 +38,6 @@ class MultipleExecutor(ExecutorBase):
         self.consumer_pool_kwargs = consumer_pool_kwargs
         self.producer_pool_args = producer_pool_args
 
-    def load_producer(self, producer: Callable, **producer_kwargs) -> None:
-        """
-        Warning !! Producer should not be an iterator!
-        """
-        self.producer = producer
-        self.producer_kwargs = producer_kwargs
-
-    def load_consumer(self, consumer: Callable, **consumer_kwargs) -> None:
-        self.consumer = consumer
-        self.consumer_kwargs = consumer_kwargs
 
     def _produce(self, id_proc: int, **producer_kwargs) -> None:
         print(
