@@ -21,7 +21,7 @@ def _balanced_ranges(total, part_size):
     return ranges
 
 
-def split_list(file_list: List[Any], n: int, i: int) -> List[Any]:
+def split_list(file_list: List[Any], n: int, i: int) -> Iterable:
     """
     with the total `n` nodes worker setting, return the distributed files for worker indexing at `i` .
     """
@@ -81,7 +81,7 @@ def get_file_list_stream(
 def generator_batch(
     generator: Iterable[Any],
     batch_size: Optional[int] = 300,
-) -> Generator[List[os.PathLike], List, List]:
+) -> Generator[Iterable, Iterable, Iterable]:
     """
     scan the whole file by a streaming process to save computer resource, yield batches by customized size.
     ### Arguments:
