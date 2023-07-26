@@ -2,6 +2,7 @@ import os
 from ..utils import consumer_typer, jaccard_similar, hard_similar
 from typing import Any, Dict, Tuple, Iterable
 import time
+import json
 
 
 class BookCategory(str):
@@ -75,9 +76,9 @@ class Books(BookCategoryBase):
 # def consume_initializer(output_dir:os.PathLike,id_proc:int,suffix:str):
 
 
-@consumer_typer
+# @consumer_typer
 def consumer(
-    data_ships: Iterable[Tuple[Dict, str]],
+    data_ships: Iterable[Tuple[os.PathLike]],
     id_proc: int,
     output_dir: os.PathLike,
     suffix: str = "_time_" + time.strftime("%Y%m%d%H%M%S"),
@@ -90,13 +91,20 @@ def consumer(
         # 目前只需要二分类就好了，只用最原始的匹配方法，后面的分类方法再说，分类方法考虑编码
         check_vals = set(metadata.values())
         check_vals.add(os.path.basename(file_path))
-        if hard_similar(re_flag, "".join(check_vals)):
+        if hard_similar(re_flag, "".join(map(lambda x: f"{x}", check_vals))):
             return category.fiction
         else:
             return category.nonfiction
 
-    for item in data_ships:
+    def json_reader(file_path: os.PathLike) -> Tuple[Dict, str]:
+        with open(file_path, "r", encoding="utf-8") as reader:
+            json_line = json.load(fp=reader)
+            metadata = json_line["meta"]
+        return metadata, file_path
+
+    for item in map(json_reader, data_ships):
         metadata, file_path = item
+
         category_path = meta_parse(metadata, file_path)
         with open(category_path, "a", encoding="utf-8") as writer:
             # 把分类结果写入对应的行中

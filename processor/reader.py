@@ -4,7 +4,7 @@ from typing import Generator, Dict, Tuple, Iterable
 import json
 
 
-@producer_typer
+# @producer_typer
 def producer(
     id_proc: int,
     file_dir: os.PathLike,
@@ -28,15 +28,16 @@ def producer(
         input_file_path_list=input_file_path_list,
     )
 
-    def json_reader(file_path: os.PathLike) -> Tuple[Dict, str]:
-        with open(file_path, "r", encoding="utf-8") as reader:
-            json_line = json.load(fp=reader)
-            metadata = json_line["meta"]
-        return metadata, file_path
+    # def json_reader(file_path: os.PathLike) -> Tuple[Dict, str]:
+    #     with open(file_path, "r", encoding="utf-8") as reader:
+    #         json_line = json.load(fp=reader)
+    #         metadata = json_line["meta"]
+    #     return metadata, file_path
 
-    yield from generator_batch(
-        map(json_reader, file_path_generator), batch_size=batch_size
-    )
+    # yield from generator_batch(
+    #     map(json_reader, file_path_generator), batch_size=batch_size
+    # )
+    yield from generator_batch(file_path_generator, batch_size=batch_size)
 
 
 if __name__ == "__main__":

@@ -69,16 +69,13 @@ class MultipleExecutor(ExecutorBase):
         )
 
     def _consume(self, id_proc: int, num_proc: int, **consumer_kwargs) -> None:
+        print(
+            f"\n===================== Consume process {id_proc:03d}:{__name__} is now working ====================="
+        )
         while True:
-            try:
-                ships = self.quene.get()
-            except:
-                continue
+            ships = self.quene.get()
             if ships == "EOF":
                 break
-            print(
-                f"\n===================== Consume process {id_proc:03d}:{__name__} is now working ====================="
-            )
             self.consumer(
                 data_ships=ships,
                 id_proc=id_proc,
