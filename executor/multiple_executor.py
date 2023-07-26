@@ -145,9 +145,9 @@ Consume process {id_proc:03d}:{__name__} terminates\n\
         producer_pool.join()
         consumer_pool.join()
         print(
-            "------------------------------------>>>>>>>>>>>>>>>>>>>>\n\
+            "=================================//////////////////////////\n\
 All the processors terminate, exit the main process.Now is {}.\n\
-           <<<<<<<<<<<<<<<<<<<<<----------------------------------".format(
-                time.strftime("%Y/%m/%d,%H:%M:%S")
+//////////////////////////=================================".format(
+                time.strftime("%Y/%m/%d|%H:%M:%S")
             )
         )
