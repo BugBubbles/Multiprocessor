@@ -3,7 +3,7 @@ from ..utils import consumer_typer, jaccard_similar, hard_similar
 from typing import Any, Dict, Tuple, Iterable
 import time
 import json
-
+import tqdm
 
 class BookCategory(str):
     pass
@@ -102,7 +102,7 @@ def consumer(
             metadata = json_line["meta"]
         return metadata, file_path
 
-    for item in map(json_reader, data_ships):
+    for item in tqdm.tqdm(map(json_reader, data_ships),desc='Determine the categories'):
         metadata, file_path = item
 
         category_path = meta_parse(metadata, file_path)

@@ -37,9 +37,14 @@ class MultipleExecutor(ExecutorBase):
         self.consumer_initial_kwargs = consumer_initial_kwargs
         self.producer_initial_kwargs = producer_initial_kwargs
 
-    def _produce(self, id_proc: int, num_proc: int, **producer_kwargs) -> None:
+    def _produce(
+        self, id_proc: int, num_proc: int, iter_deco: str = "=", **producer_kwargs
+    ) -> None:
         print(
-            f"\n===================== Produce process {id_proc:03d}:{__name__} is now working ====================="
+            "\n"
+            + f"{iter_deco}" * 10
+            + f" Produce process {id_proc:03d}:{__name__} is now working "
+            + f"{iter_deco}" * 10
         )
         for ships in self.producer(
             id_proc=id_proc, num_proc=num_proc, **producer_kwargs
@@ -51,13 +56,12 @@ class MultipleExecutor(ExecutorBase):
                 time.sleep(10)
             self.quene.put(ships)
             print(
-                f"\n===================== Produce process {id_proc:03d}:{__name__} is temporarily finished, waiting for next boot ====================="
+                "\n"
+                + f"{iter_deco}" * 10
+                + f" Produce process {id_proc:03d}:{__name__} is temporarily finished, waiting for next loop "
+                + f"{iter_deco}" * 10
             )
         i = 0
-        # while i < self.rate:
-        #     if not self.quene.full():
-        #         self.quene.put("EOF")
-        #         i += 1
         # 只让最后一个进程放终止信号
         if id_proc == num_proc - 1:
             while i < self.num_consumer:
@@ -65,12 +69,19 @@ class MultipleExecutor(ExecutorBase):
                     self.quene.put("EOF")
                     i += 1
         print(
-            f"\n*************** Produce process {id_proc:03d}:{__name__} terminates ***************"
+            f"\n+++++++++++++++++++++++++++++++++++>>>>>>>>>>>>>>>>>>>>\n\
+Produce process {id_proc:03d}:{__name__} terminates\n\
+<<<<<<<<<<<<<<<<<<<<<+++++++++++++++++++++++++++++++++++"
         )
 
-    def _consume(self, id_proc: int, num_proc: int, **consumer_kwargs) -> None:
+    def _consume(
+        self, id_proc: int, num_proc: int, iter_deco: str = "|", **consumer_kwargs
+    ) -> None:
         print(
-            f"\n===================== Consume process {id_proc:03d}:{__name__} is now working ====================="
+            "\n"
+            + f"{iter_deco}" * 10
+            + f" Consume process {id_proc:03d}:{__name__} is now working "
+            + f"{iter_deco}" * 10
         )
         while True:
             ships = self.quene.get()
@@ -83,11 +94,16 @@ class MultipleExecutor(ExecutorBase):
                 **consumer_kwargs,
             )
             print(
-                f"\n================ Consume process {id_proc:03d}:{__name__} finishes, waiting for next boot ================"
+                "\n"
+                + f"{iter_deco}" * 10
+                + f" Consume process {id_proc:03d}:{__name__} finishes, waiting for next loop "
+                + f"{iter_deco}" * 10
             )
 
         print(
-            f"\n*************** Consume process {id_proc:03d}:{__name__} terminates ***************"
+            f"\n------------------------------------>>>>>>>>>>>>>>>>>>>>\n\
+Consume process {id_proc:03d}:{__name__} terminates\n\
+<<<<<<<<<<<<<<<<<<<<<----------------------------------"
         )
 
     def __call__(self, **kwargs):
@@ -130,9 +146,8 @@ class MultipleExecutor(ExecutorBase):
         consumer_pool.join()
         print(
             "------------------------------------>>>>>>>>>>>>>>>>>>>>\n\
-            All the processors terminate, exit the main process.\
-            Now is {}.\n\
+All the processors terminate, exit the main process.Now is {}.\n\
            <<<<<<<<<<<<<<<<<<<<<----------------------------------".format(
-                time.strftime("%Y / %m / %d, %H : %M : %S")
+                time.strftime("%Y/%m/%d,%H:%M:%S")
             )
         )
