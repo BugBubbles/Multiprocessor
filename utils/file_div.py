@@ -21,7 +21,7 @@ def _balanced_ranges(total, part_size):
     return ranges
 
 
-def split_list(file_list: List[Any], n: int, i: int) -> Iterable:
+def split_list(file_list: List[Any], n: int, i: int) -> List[Any]:
     """
     with the total `n` nodes worker setting, return the distributed files for worker indexing at `i` .
     """
@@ -93,7 +93,7 @@ def generator_batch(
     if batch_size < 1:
         raise ValueError("batch_size must be at least one")
     it = iter(generator)
-    while batch := tuple(itertools.islice(it, batch_size)):
+    while batch := list(itertools.islice(it, batch_size)):
         yield batch
 
 

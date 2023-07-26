@@ -6,7 +6,12 @@ import json
 
 @producer_typer
 def producer(
-    id_proc: int, file_dir: os.PathLike, num_proc: int, file_suffix: str, **kwargs
+    id_proc: int,
+    file_dir: os.PathLike,
+    file_suffix: str,
+    num_proc: int = 1,
+    batch_size: int = 300,
+    **kwargs,
 ) -> Generator[Iterable[Tuple[Dict, str]], Iterable, Iterable]:
     """
     multiple processing supported producer, to produce a batch of JSON string from files.
@@ -29,7 +34,9 @@ def producer(
             metadata = json_line["meta"]
         return metadata, file_path
 
-    yield from generator_batch(map(json_reader, file_path_generator), batch_size=10)
+    yield from generator_batch(
+        map(json_reader, file_path_generator), batch_size=batch_size
+    )
 
 
 if __name__ == "__main__":

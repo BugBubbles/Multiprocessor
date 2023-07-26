@@ -5,6 +5,7 @@ setuptools.setup(
     version="1.3.0",
     author="Tschen Boffee",
     include_package_data=True,
-    packages=setuptools.find_packages(where='../classfy_book'),
+    packages=setuptools.find_packages(where="../classfy_book"),
     description="A small tool for classifying books based on its file name and meta values",
+    python_requires=">=3.6",
 )
