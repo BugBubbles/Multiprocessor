@@ -5,6 +5,7 @@ import time
 import json
 import tqdm
 
+
 class BookCategory(str):
     pass
 
@@ -24,7 +25,21 @@ FICTION = [
     "童话",
     "名著",  # 大多是经典小说散文，计划再次细分
     "致纯书苑",
-    "历史穿越",
+    "穿越",
+    "青春校园",
+    "武侠",
+    "金庸",
+    "玄幻",
+    "重生",
+    "宠文",
+    "火影忍者",
+    "完结",
+    "番外",
+    "鬼吹灯",
+    "东野圭吾",
+    "甜文",
+    "青春校园",
+    "村上春树",
 ]
 re_flag = "|".join(map(lambda x: f"(.*{x}.*)", FICTION))
 
@@ -102,7 +117,9 @@ def consumer(
             metadata = json_line["meta"]
         return metadata, file_path
 
-    for item in tqdm.tqdm(map(json_reader, data_ships),desc='Determine the categories'):
+    for item in tqdm.tqdm(
+        map(json_reader, data_ships), desc="Determine the categories"
+    ):
         metadata, file_path = item
 
         category_path = meta_parse(metadata, file_path)
