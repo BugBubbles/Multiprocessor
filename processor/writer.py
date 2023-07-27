@@ -124,5 +124,4 @@ def consumer(
 
         category_path = meta_parse(metadata, file_path)
         with open(category_path, "a", encoding="utf-8") as writer:
-            # 把分类结果写入对应的行中
             print(file_path, file=writer, flush=True)
