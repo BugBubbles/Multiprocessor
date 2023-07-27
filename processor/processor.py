@@ -1,6 +1,7 @@
 # 可以像搭一个神经网络一样搭一个多进程程序，也要注意搭得太多了，反而会影响效率，两层就足够应付大多数情况了
-from typing import Any, List, Tuple, Calllale, Iterable
+from typing import Any
 from ..utils.type_collector import DataShips
+from ..debugger import producer_typer, consumer_typer
 
 
 class ProcessorBase:
@@ -29,6 +30,7 @@ class ProcessorBase:
                   input_file_path_list=input_file_path_list,
               )
               yield from generator_batch(file_path_generator, batch_size=batch_size)
+
     >>>   def consumer(
             data_ships: Iterable[Tuple[os.PathLike]],
             id_proc: int,
@@ -37,26 +39,22 @@ class ProcessorBase:
             **kwargs,
         ):
             category = Books(output_dir=output_dir, id_proc=id_proc, suffix=suffix)
-
-    >>>     def meta_parse(metadata: Dict, file_path: os.PathLike) -> os.PathLike:
+            def meta_parse(metadata: Dict, file_path: os.PathLike) -> os.PathLike:
                 check_vals = set(metadata.values())
                 check_vals.add(os.path.basename(file_path))
                 if hard_similar(re_flag, "".join(map(lambda x: f"{x}", check_vals))):
                     return category.fiction
                 else:
                     return category.nonfiction
-
-    >>>     def json_reader(file_path: os.PathLike) -> Tuple[Dict, str]:
+            def json_reader(file_path: os.PathLike) -> Tuple[Dict, str]:
                 with open(file_path, "r", encoding="utf-8") as reader:
                     json_line = json.load(fp=reader)
                     metadata = json_line["meta"]
                 return metadata, file_path
-
             for item in tqdm.tqdm(
                 map(json_reader, data_ships), desc="Determine the categories"
             ):
                 metadata, file_path = item
-
                 category_path = meta_parse(metadata, file_path)
                 with open(category_path, "a", encoding="utf-8") as writer:
                     print(file_path, file=writer, flush=True)
@@ -69,25 +67,33 @@ class ProcessorBase:
         raise NotImplementedError
 
     @staticmethod
+    @producer_typer
     def producer(id_proc: int, num_proc: int, *args, **kwargs) -> DataShips:
         """
         The main function for producer.
-        ### Arguments:
-         - `id_proc` : TODO MUST INCLUDE this API in you producer DEFINATION!!! the index of certain producer processor, it is an open API for practical applying. Of course that ignore it can be a valid usage.
-         - `num_proc` : TODO MUST INCLUDE this API in you producer DEFINATION!!! the total amount number of producer processors, it is an open API for practical applying. Of course that ignore it can be a valid usage.
+        #### Explicitly NEEDED Arguments:
+         - `id_proc` : (TODO) MUST INCLUDE this API in you producer DEFINATION!!! The index of certain producer processor, it is an open API for practical applying. Of course that ignore it can be a valid usage.
+         - `num_proc` : (TODO) MUST INCLUDE this API in you producer DEFINATION!!! The total amount number of producer processors, it is an open API for practical applying. Of course that ignore it can be a valid usage.
+        #### Optionally NEEDED Arguments:
+         - 'iter_deco' : a decorator for each producer visualize iteration process.
         """
-        raise NotImplementedError
+        assert id_proc and num_proc
+        pass
 
     @staticmethod
+    @consumer_typer
     def consumer(data_ships: DataShips, id_proc: int, num_proc: int, **kwargs) -> Any:
         """
         The main function for consumer.
-        ### Arguments:
+        #### Explicitly NEEDED Arguments:
          - `data_ships` : A `mutiprocessing.Manager` supported type for data sharing.
-         - `id_proc` : TODO MUST INCLUDE this API in you producer DEFINATION!!! the index of certain producer processor, it is an open API for practical applying. Of course that ignore it can be a valid usage.
-         - `num_proc` : TODO MUST INCLUDE this API in you producer DEFINATION!!! the total amount number of producer processors, it is an open API for practical applying. Of course that ignore it can be a valid usage.
+         - `id_proc` : (TODO) MUST INCLUDE this API in you producer DEFINATION!!! the index of certain producer processor, it is an open API for practical applying. Of course that ignore it can be a valid usage.
+         - `num_proc` : (TODO) MUST INCLUDE this API in you producer DEFINATION!!! the total amount number of producer processors, it is an open API for practical applying. Of course that ignore it can be a valid usage.
+        #### Optionally NEEDED Arguments:
+         - 'iter_deco' : a decorator for each consumer visualize iteration process.
         """
-        raise NotImplementedError
+        assert id_proc and num_proc
+        pass
 
 
 class Processor(ProcessorBase):

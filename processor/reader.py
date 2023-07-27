@@ -1,10 +1,10 @@
 import os
-from ..utils import generator_batch, producer_typer, get_file_list_stream_id
+from ..utils import generator_batch, get_file_list_stream_id
 from typing import Generator, Dict, Tuple, Iterable
-import json
+from ..debugger import producer_typer
 
 
-# @producer_typer
+@producer_typer(is_debug=True)
 def producer(
     id_proc: int,
     file_dir: os.PathLike,
@@ -28,21 +28,12 @@ def producer(
         input_file_path_list=input_file_path_list,
     )
 
-    # def json_reader(file_path: os.PathLike) -> Tuple[Dict, str]:
-    #     with open(file_path, "r", encoding="utf-8") as reader:
-    #         json_line = json.load(fp=reader)
-    #         metadata = json_line["meta"]
-    #     return metadata, file_path
-
-    # yield from generator_batch(
-    #     map(json_reader, file_path_generator), batch_size=batch_size
-    # )
     yield from generator_batch(file_path_generator, batch_size=batch_size)
 
 
 if __name__ == "__main__":
     test_dir = "/dataset_goosefs/cos_shanghai_1/raw_datasets/books/baidu"
-    num_proc = 4
+    num_proc = 1
     for id_proc in range(num_proc):
         i = 0
         gen = producer(

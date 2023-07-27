@@ -1,6 +1,7 @@
 import os
-from ..utils import consumer_typer, jaccard_similar, hard_similar
+from ..utils import jaccard_similar, hard_similar
 from typing import Any, Dict, Tuple, Iterable
+from .processor import consumer_typer
 import time
 import json
 import tqdm
@@ -91,7 +92,7 @@ class Books(BookCategoryBase):
 # def consume_initializer(output_dir:os.PathLike,id_proc:int,suffix:str):
 
 
-# @consumer_typer
+@consumer_typer(is_debug=True)
 def consumer(
     data_ships: Iterable[Tuple[os.PathLike]],
     id_proc: int,

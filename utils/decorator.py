@@ -13,19 +13,9 @@ def producer_typer(producer: Callable[[Any], Iterable[DataShips]]):
         *producer_args,
         **producer_kwargs,
     ) -> Iterable[DataShips]:
-        assert isinstance(id_proc, int) and isinstance(num_proc, int)
-        try:
-            return producer(
-                id_proc=id_proc, num_proc=num_proc, *producer_args, **producer_kwargs
-            )
-        except Exception as exc:
-            print(
-                "*" * 10
-                + f"ERROR IN PROCESSOR {id_proc}:{producer.__name__}"
-                + "*" * 10
-            )
-            print(exc)
-            raise TypeError("Not a valid input arguments type.")
+        return producer(
+            id_proc=id_proc, num_proc=num_proc, *producer_args, **producer_kwargs
+        )
 
     return warpper
 
@@ -41,23 +31,12 @@ def consumer_typer(consumer: Callable[[DataShips, Any], Any]):
         *consumer_args,
         **consumer_kwargs,
     ):
-        assert data_ships
-        assert isinstance(id_proc, int) and isinstance(num_proc, int)
-        try:
-            return consumer(
-                data_ships=data_ships,
-                id_proc=id_proc,
-                num_proc=num_proc,
-                *consumer_args,
-                **consumer_kwargs,
-            )
-        except Exception as exc:
-            print(
-                "*" * 10
-                + f"ERROR IN PROCESSOR {id_proc}:{consumer.__name__}"
-                + "*" * 10
-            )
-            print(exc)
-            raise TypeError("Not a valid input arguments type.")
+        return consumer(
+            data_ships=data_ships,
+            id_proc=id_proc,
+            num_proc=num_proc,
+            *consumer_args,
+            **consumer_kwargs,
+        )
 
     return warpper

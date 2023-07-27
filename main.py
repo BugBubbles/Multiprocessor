@@ -36,6 +36,12 @@ def get_args() -> argparse.Namespace:
         help="Enable a multiple processing programme.",
     )
     parse.add_argument(
+        "--debug_enable",
+        "-de",
+        action="store_true",
+        help="Enable a debug supported mode for multiple processing programme.",
+    )
+    parse.add_argument(
         "--num_producer",
         "-np",
         type=int,
@@ -54,14 +60,14 @@ def get_args() -> argparse.Namespace:
         "-ms",
         type=int,
         default=300,
-        help="The number of cache for multiple processing programme.",
+        help="The number of shared quene cache size of items for multiple processing programme.",
     )
     parse.add_argument(
         "--cache_size",
         "-cs",
         type=int,
         default=300,
-        help="The number of cache for multiple processing programme.",
+        help="The number of single itom in each item for writer to use.",
     )
     args = parse.parse_args()
     return args
@@ -102,5 +108,4 @@ if __name__ == "__main__":
             output_dir=args.output_dir,
         )
 
-        # run it
         worker()
