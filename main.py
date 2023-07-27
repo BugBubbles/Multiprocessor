@@ -1,8 +1,7 @@
-from classify_book.executor.single_executor import SingleExecutor as single_executor
-from classify_book.executor.multiple_executor import MultipleExecutor as multi_executor
-from classify_book.processor import producer,consumer
+from classify_book.processor import producer, consumer
 import argparse
 import warnings
+import importlib
 
 
 def get_args() -> argparse.Namespace:
@@ -83,11 +82,22 @@ if __name__ == "__main__":
         )
     file_suffix = args.file_suffix
     if not args.multiple_enable:
-        # worker = single_executor()
-        # worker.load_producer(producer=producer,file_suffix=file_suffix,)
-        # worker.load_consumer(consumer)
-        pass
+        from classify_book.executor.single_executor import (
+            SingleExecutor as single_executor,
+        )
+
+        worker = single_executor()
+        worker.load_producer(
+            producer=producer,
+            file_suffix=file_suffix,
+        )
+        worker.load_consumer(consumer)
+        worker()
     else:
+        from classify_book.executor.multiple_executor import (
+            MultipleExecutor as multi_executor,
+        )
+
         try:
             assert args.num_consumer and args.num_producer and args.max_size
         except:
@@ -95,17 +105,22 @@ if __name__ == "__main__":
                 "No num_consumer, num_producer or max_size arguments is found, using the default value",
                 DeprecationWarning,
             )
-        worker = multi_executor(num_producer=args.num_producer, num_consumer=args.num_consumer, max_size=args.max_size)
-        worker.load_producer(
-            producer=producer,
-            file_dir=args.file_dir,
-            file_suffix=file_suffix,
-            batch_size=args.cache_size,
-        )
-        # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
-        worker.load_consumer(
-            consumer=consumer,
-            output_dir=args.output_dir,
-        )
+        with multi_executor(
+            num_producer=args.num_producer,
+            num_consumer=args.num_consumer,
+            max_size=args.max_size,
+        ) as worker:
+            worker.load_producer(
+                producer=producer,
+                file_dir=args.file_dir,
+                file_suffix=file_suffix,
+                batch_size=args.cache_size,
+            )
+            # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
+            worker.load_consumer(
+                consumer=consumer,
+                output_dir=args.output_dir,
+            )
+            worker()
 
-        worker()
+    # worker()

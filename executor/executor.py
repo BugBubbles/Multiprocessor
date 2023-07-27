@@ -2,6 +2,7 @@ from typing import Any, Callable, Dict
 from ..utils.type_collector import DataShips
 from ..processor import Processor
 import warnings
+import traceback
 
 
 class ExecutorBase:
@@ -10,6 +11,19 @@ class ExecutorBase:
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
+
+    def __enter__(self):
+        """support for context manager for `with ... as`"""
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        if exc_type or exc_value or exc_tb:
+            traceback.format_exception(etype=exc_type, value=exc_value, tb=exc_tb)
+        else:
+            print(
+                "========== The whole processing has successfully finished! =========="
+            )
+        return
 
     def load_producer(
         self, producer: Callable[[int, Any], DataShips], **producer_kwargs
