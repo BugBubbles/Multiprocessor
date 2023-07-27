@@ -1,12 +1,13 @@
 from typing import Any, Callable, Dict
 from ..utils.type_collector import DataShips
+from ..processor import Processor
 
 
 class ExecutorBase:
     def __init__(self, *exec_args, **exec_kwargs) -> None:
         pass
 
-    def __call__(self, **kwargs):
+    def __call__(self, *args, **kwargs):
         raise NotImplementedError
 
     def load_producer(
@@ -33,13 +34,6 @@ class ExecutorBase:
         self.consumer = consumer
         self._consumer_kwargs = consumer_kwargs
 
-    # @property
-    # def producer(self) -> Callable[[int, Any], DataShips]:
-    #     """
-    #     Read only property for producer Callable functions.
-    #     """
-    #     return self.producer
-
     @property
     def producer_kwargs(self) -> Dict:
         """
@@ -54,9 +48,11 @@ class ExecutorBase:
         """
         return self._consumer_kwargs
 
-    # @property
-    # def consumer(self) -> Callable[[DataShips, int, Any], Any]:
-    #     """
-    #     Read only property for consumer Callable functions.
-    #     """
-    #     return self._consumer
+    def build(self, processor: Processor, *proc_args, **proc_kwargs) -> None:
+        """
+        #### Prelaunch functions
+        Build a multiple processor programme from a predefined `Processor` class module.
+        ### Arguments:
+         - `processor` : A Processor class module for multiple processor programme, you must reload it before your executor runs.
+        """
+        processor.consumer

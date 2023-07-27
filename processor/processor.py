@@ -1,7 +1,6 @@
-# 像搭一个神经网络一样搭一个多进程程序，也要注意搭得太多了，反而会影响效率，两层就足够应付大多数情况了
+# 可以像搭一个神经网络一样搭一个多进程程序，也要注意搭得太多了，反而会影响效率，两层就足够应付大多数情况了
 from typing import Any, List, Tuple, Calllale, Iterable
 from ..utils.type_collector import DataShips
-import functools
 
 
 class ProcessorBase:
@@ -89,3 +88,7 @@ class ProcessorBase:
          - `num_proc` : TODO MUST INCLUDE this API in you producer DEFINATION!!! the total amount number of producer processors, it is an open API for practical applying. Of course that ignore it can be a valid usage.
         """
         raise NotImplementedError
+
+
+class Processor(ProcessorBase):
+    pass
