@@ -1,6 +1,7 @@
 from typing import Any, Callable, Dict
 from ..utils.type_collector import DataShips
 from ..processor import Processor
+import warnings
 
 
 class ExecutorBase:
@@ -48,11 +49,19 @@ class ExecutorBase:
         """
         return self._consumer_kwargs
 
-    def build(self, processor: Processor, *proc_args, **proc_kwargs) -> None:
+    def load_processor(self, processor: Processor, *proc_args, **proc_kwargs) -> None:
         """
         #### Prelaunch functions
         Build a multiple processor programme from a predefined `Processor` class module.
         ### Arguments:
          - `processor` : A Processor class module for multiple processor programme, you must reload it before your executor runs.
         """
-        processor.consumer
+        self.producer = processor.producer
+        self.consumer = processor.consumer
+        try:
+            assert self.consumer_kwargs and self.producer_kwargs
+        except:
+            warnings.warn(
+                "Maybe you have not load the key word arguments for the producers and consumers. Please load them before you run this executor!",
+                DeprecationWarning,
+            )
