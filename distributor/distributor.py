@@ -7,7 +7,17 @@ class DistributorBase:
     def __init__(self, *dist_args, **dist_kwargs) -> None:
         pass
 
-    def __call__(self, *args, **kwargs):
+    @staticmethod
+    def __call__(
+        call_func: Callable[[List[Any], Any], Any], *splitable_args: List, **fn_kwargs
+    ):
+        """
+        Using a mpich executor to callback `call_func` function in paralleled processing nodes.
+        ### Arguments:
+         - `call_func` : A callable function that accept at least one list like arguments.
+         - `splitable_args` : serializable and position arguments, you should pre-divide these arguments and store them in different `list` like variables (`numpy.ndarray`, `Set`, `Tuple` and `dict` are also supported, all the supported types you can use are now being presented in https://mpi4py.readthedocs.io/en/stable/tutorial.html)
+         - `fn_kwargs` : `call_func` keyword arguments.
+        """
         raise NotImplementedError
 
     def __enter__(self):
@@ -23,14 +33,15 @@ class DistributorBase:
             )
         return
 
-    def load_executor(self, executor: Executor, **executor_kwargs) -> None:
+    def load_executor(self, executor: Executor, **executor_init_kwargs) -> None:
         """
-        Load an INSTANCED executor to distribute into multiple nodes.
+        Load an object-like executor (NOT an instance one) to distribute into multiple nodes.
         ### Arguments:
          - `executor` : A executor class module for distributed programme. That means it can independently execute in one machine. You must reload it before your distributor runs.
         """
         self.executor = executor
-        self.executor_kwargs = executor_kwargs
+        self._executor_init_kwargs = executor_init_kwargs
+        return
 
     def load_divider(
         self, divider: Callable[[List[Any], int, Any], List[Any]], **divider_kwargs
@@ -63,3 +74,12 @@ class DistributorBase:
         """
         self.divider = divider
         self._divider_kwargs = divider_kwargs
+        return
+
+    @property
+    def divider_kwargs(self):
+        return self._divider_kwargs
+
+    @property
+    def executor_init_kwargs(self):
+        return self._executor_init_kwargs
