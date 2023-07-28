@@ -1,9 +1,11 @@
 import os
-from ..utils import consumer_typer, jaccard_similar, hard_similar
+from ..utils import jaccard_similar, hard_similar
 from typing import Any, Dict, Tuple, Iterable
+from .processor import consumer_typer
 import time
 import json
 import tqdm
+
 
 class BookCategory(str):
     pass
@@ -24,7 +26,21 @@ FICTION = [
     "童话",
     "名著",  # 大多是经典小说散文，计划再次细分
     "致纯书苑",
-    "历史穿越",
+    "穿越",
+    "青春校园",
+    "武侠",
+    "金庸",
+    "玄幻",
+    "重生",
+    "宠文",
+    "火影忍者",
+    "完结",
+    "番外",
+    "鬼吹灯",
+    "东野圭吾",
+    "甜文",
+    "青春校园",
+    "村上春树",
 ]
 re_flag = "|".join(map(lambda x: f"(.*{x}.*)", FICTION))
 
@@ -76,7 +92,7 @@ class Books(BookCategoryBase):
 # def consume_initializer(output_dir:os.PathLike,id_proc:int,suffix:str):
 
 
-# @consumer_typer
+@consumer_typer(is_debug=True)
 def consumer(
     data_ships: Iterable[Tuple[os.PathLike]],
     id_proc: int,
@@ -102,10 +118,11 @@ def consumer(
             metadata = json_line["meta"]
         return metadata, file_path
 
-    for item in tqdm.tqdm(map(json_reader, data_ships),desc='Determine the categories'):
+    for item in tqdm.tqdm(
+        map(json_reader, data_ships), desc="Determine the categories"
+    ):
         metadata, file_path = item
 
         category_path = meta_parse(metadata, file_path)
         with open(category_path, "a", encoding="utf-8") as writer:
-            # 把分类结果写入对应的行中
             print(file_path, file=writer, flush=True)

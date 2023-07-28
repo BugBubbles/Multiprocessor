@@ -1,9 +1,5 @@
 from typing import Callable, List, Dict, Iterable, Optional, Any
-
-# from .exceptions import NoSplitError, BadFormatWarning
 from .type_collector import DataShips
-
-# import warnings
 from functools import wraps
 
 
@@ -15,15 +11,11 @@ def producer_typer(producer: Callable[[Any], Iterable[DataShips]]):
         id_proc: Optional[int],
         num_proc: Optional[int],
         *producer_args,
-        **producer_kwargs
+        **producer_kwargs,
     ) -> Iterable[DataShips]:
-        assert isinstance(id_proc, int) and isinstance(num_proc, int)
-        try:
-            return producer(
-                id_proc=id_proc, num_proc=num_proc, *producer_args, **producer_kwargs
-            )
-        except:
-            raise TypeError("Not a valid input arguments type.")
+        return producer(
+            id_proc=id_proc, num_proc=num_proc, *producer_args, **producer_kwargs
+        )
 
     return warpper
 
@@ -37,19 +29,14 @@ def consumer_typer(consumer: Callable[[DataShips, Any], Any]):
         id_proc: Optional[int],
         num_proc: Optional[int],
         *consumer_args,
-        **consumer_kwargs
+        **consumer_kwargs,
     ):
-        assert data_ships
-        assert isinstance(id_proc, int) and isinstance(num_proc, int)
-        try:
-            return consumer(
-                data_ships=data_ships,
-                id_proc=id_proc,
-                num_proc=num_proc,
-                *consumer_args,
-                **consumer_kwargs
-            )
-        except:
-            raise TypeError("Not a valid input arguments type.")
+        return consumer(
+            data_ships=data_ships,
+            id_proc=id_proc,
+            num_proc=num_proc,
+            *consumer_args,
+            **consumer_kwargs,
+        )
 
     return warpper
