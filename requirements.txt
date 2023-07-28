@@ -6,3 +6,4 @@ mammoth==1.4.10
 click==8.1.5
 requests==2.31.0
 jieba
+mpi4py
