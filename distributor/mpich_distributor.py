@@ -1,3 +1,4 @@
+from curses import noecho
 from typing import Any, Callable, List, Optional
 from ..executor import Executor
 from .distributor import DistributorBase
@@ -19,11 +20,37 @@ class MpichDistributor(DistributorBase):
         *splitable_args: List,
         **fn_kwargs,
     ):
-        return super().__call__(call_func, *splitable_args, **fn_kwargs)
+        comm = mpi.COMM_WORLD
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for splitable_arg in splitable_args:
+            try:
+                assert len(splitable_arg) == size
+            except:
+                raise AttributeError(
+                    f"{splitable_arg.__name__} cannot be distributed into {size} nodes."
+                )
+        splited_args = list(
+            comm.scatter(splitable_arg, root=0) for splitable_arg in splitable_args
+        )
+        splited_output = call_func(*splited_args, **fn_kwargs)
+        gathered_output = comm.gather(splited_output, root=0)
+        if rank == 0:
+            print(
+                ">" * 10
+                + "\n This is host machine with callback being finished \n"
+                + "<" * 10
+            )
+            return gathered_output
+        else:
+            print(
+                ">" * 10
+                + "\n This is subordinary machine with callback being finished \n"
+                + "<" * 10
+            )
+            return
 
-    def exect_run(
-        self, input_list: List, num_node: Optional[int] = None, *args, **kwargs
-    ):
+    def run(self, input_list: List, num_node: Optional[int] = None, *args, **kwargs):
         try:
             assert self.divider and self.divider_kwargs
             assert self.executor and self.executor_init_kwargs

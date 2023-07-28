@@ -17,6 +17,8 @@ class DistributorBase:
          - `call_func` : A callable function that accept at least one list like arguments.
          - `splitable_args` : serializable and position arguments, you should pre-divide these arguments and store them in different `list` like variables (`numpy.ndarray`, `Set`, `Tuple` and `dict` are also supported, all the supported types you can use are now being presented in https://mpi4py.readthedocs.io/en/stable/tutorial.html)
          - `fn_kwargs` : `call_func` keyword arguments.
+        ### Usage
+        You can use this method without instance this `Distributor` class, the final output will be gather into the root machine (rank = 0).
         """
         raise NotImplementedError
 
@@ -83,3 +85,7 @@ class DistributorBase:
     @property
     def executor_init_kwargs(self):
         return self._executor_init_kwargs
+
+
+class Distributor(DistributorBase):
+    pass
