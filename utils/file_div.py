@@ -5,7 +5,7 @@ import itertools
 
 
 def _get_balanced_part_nums(total, part_size):
-    base = int(total / part_size)
+    base = total // part_size
     remainder = total % part_size
     return [base + int(i < remainder) for i in range(part_size)]
 
