@@ -24,7 +24,7 @@ class ExecutorBase:
         return
 
     def load_producer(
-        self, producer: Callable[[int,int, Any], DataShips], **producer_kwargs
+        self, producer: Callable[[int, int, Any], DataShips], **producer_kwargs
     ) -> None:
         """
         Set producer function and its arguments, keep in mind that producer function should output a DATASHIPS like data which can be obtained and utilized by consumer.
@@ -36,7 +36,7 @@ class ExecutorBase:
         self._producer_kwargs = producer_kwargs
 
     def load_consumer(
-        self, consumer: Callable[[DataShips, int,int, Any], Any], **consumer_kwargs
+        self, consumer: Callable[[DataShips, int, int, Any], Any], **consumer_kwargs
     ) -> None:
         """
         Set consumer function and its arguments, keep in mind that consumer function should take a DATASHIPS like data which is produced by producer function and transported through a shared memory or quene.
@@ -60,6 +60,7 @@ class ExecutorBase:
         Read only property for consumer key word arguments Dictionary.
         """
         return self._consumer_kwargs
+
 
 class Executor(ExecutorBase):
     pass
