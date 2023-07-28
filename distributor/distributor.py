@@ -24,8 +24,7 @@ class DistributorBase:
 
     def load_executor(self, executor: Executor, **executor_kwargs) -> None:
         """
-        #### Prelaunch functions
-        Build a distributed executor programme from a predefined `Executor` class module.
+        Load an INSTANCED executor to distribute into multiple nodes.
         ### Arguments:
          - `executor` : A executor class module for distributed programme. That means it can independently execute in one machine. You must reload it before your distributor runs.
         """
