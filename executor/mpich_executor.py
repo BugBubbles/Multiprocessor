@@ -1,5 +1,5 @@
 from .executor import ExecutorBase
-
+from  mpi4py import MPI
 
 class MpichExecutor(ExecutorBase):
     '''
