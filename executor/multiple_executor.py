@@ -1,4 +1,3 @@
-from typing import Callable, Any
 from .executor import ExecutorBase
 import multiprocessing as mp
 import time
