@@ -64,7 +64,7 @@ def get_file_list_stream(
     ### Arguments:
      - `file_dir` : the root directory of whole files
      - `file_suffix` : each files' suffix, for example '.docx'
-     - `input_file_path_list` : a list of completely mapped file paths to the files
+     - `input_file_path_list` : a list of completely mapped file paths to the files, optionally. However this argument will overwrite the `file_dir` argument.
     """
     if input_file_path_list == None:
         for f_dir, _, f_list in tqdm.tqdm(

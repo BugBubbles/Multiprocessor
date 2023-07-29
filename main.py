@@ -3,7 +3,10 @@ import argparse
 import warnings
 
 
-def sinprocessor(file_dir, file_suffix, is_debug, output_dir, **kwargs):
+def sinprocessor(
+    file_dir, file_suffix, is_debug, output_dir, input_file_path_list, **kwargs
+):
+    """这是已经被分割后的list：`file_dir`"""
     from Multiprocessor.executor.single_executor import (
         SingleExecutor as single_executor,
     )
@@ -14,6 +17,7 @@ def sinprocessor(file_dir, file_suffix, is_debug, output_dir, **kwargs):
             file_dir=file_dir,
             file_suffix=file_suffix,
             is_debug=is_debug,
+            input_file_path_list=input_file_path_list,
         )
         worker.load_consumer(
             consumer=consumer, output_dir=output_dir, is_debug=is_debug
@@ -29,8 +33,9 @@ def multiprocessor(
     file_suffix,
     cache_size,
     is_debug,
+    input_file_path_list,
     output_dir,
-    **kwargs
+    **kwargs,
 ):
     from Multiprocessor.executor.multiple_executor import (
         MultipleExecutor as multi_executor,
@@ -53,6 +58,7 @@ def multiprocessor(
             file_dir=file_dir,
             file_suffix=file_suffix,
             batch_size=cache_size,
+            input_file_path_list=input_file_path_list,
             is_debug=is_debug,
         )
         # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
@@ -144,8 +150,25 @@ if __name__ == "__main__":
             multiprocessor(file_dir=file_dir, **args.__dict__)
     else:
         from Multiprocessor.distributor import MpichDistributor as mpich_distributor
+        import itertools
+        from random import shuffle
+
+        def div_func(file_paths, num_part: int, shuf: bool = False):
+            def split_list(data_list, num_part):
+                batch_size = len(data_list) // num_part
+                it = iter(data_list)
+                while batch := list(itertools.islice(it, batch_size)):
+                    yield batch
+
+            if shuf:
+                file_paths = shuffle(file_paths)
+            return [file_splits for file_splits in split_list(file_paths, num_part)]
 
         if not args.multiple_enable:
-            mpich_distributor.run(sinprocessor, [file_dir], **args.__dict__)
+            mpich_distributor.run(
+                sinprocessor, file_dir, div_funcs=[div_func], **args.__dict__
+            )
         else:
-            mpich_distributor.run(multiprocessor, [file_dir], **args.__dict__)
+            mpich_distributor.run(
+                multiprocessor, file_dir, div_funcs=[div_func], **args.__dict__
+            )

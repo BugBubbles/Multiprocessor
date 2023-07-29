@@ -1,5 +1,5 @@
 from ..utils import generator_batch, get_file_list_stream_id
-from typing import Generator, Dict, Tuple, Iterable, Any
+from typing import Generator, Dict, Tuple, Iterable, Any, List
 from ..utils.type_collector import DataShips
 from ..debugger import producer_typer, consumer_typer
 import os
@@ -71,6 +71,7 @@ def producer(
     num_proc: int,
     batch_size: int = 300,
     is_debug: bool = False,
+    input_file_path_list: List = None,
     *args,
     **kwargs,
 ):
@@ -81,6 +82,7 @@ def producer(
         file_suffix: str,
         num_proc: int,
         batch_size: int,
+        input_file_path_list: List = None,
         *args,
         **kwargs,
     ) -> Generator[Iterable[Tuple[Dict, str]], Iterable, Iterable]:
@@ -92,10 +94,6 @@ def producer(
         #### Optionally NEEDED Arguments:
         - 'iter_deco' : a decorator for each producer visualize iteration process.
         """
-        try:
-            input_file_path_list = kwargs.pop("input_file_path_list")
-        except:
-            input_file_path_list = None
         file_path_generator = get_file_list_stream_id(
             file_dir=file_dir,
             file_suffix=file_suffix,
@@ -112,6 +110,7 @@ def producer(
         file_dir=file_dir,
         file_suffix=file_suffix,
         batch_size=batch_size,
+        input_file_path_list=input_file_path_list,
         *args,
         **kwargs,
     )
@@ -163,14 +162,6 @@ class BookCategoryBase:
     def output_dir(self) -> os.PathLike:
         return self.output_dir
 
-    # def __setattr__(self, __dirname: str, __dir: os.PathLike):
-    #     if not os.path.exists(__dir):
-    #         os.mkdir(__dir)
-    #     self.__dict__[f"__{__dirname}"] = __dir
-
-    # def __getattr__(self, __dirname: str):
-    #     return self.__dict__[f"__{__dirname}"]
-
 
 class Books(BookCategoryBase):
     def __init__(self, output_dir: os.PathLike, id_proc: int, suffix: str) -> None:
@@ -208,13 +199,13 @@ def consumer(
     is_debug: bool = False,
     **kwargs,
 ):
-    @consumer_typer(is_debug=True)
+    @consumer_typer(is_debug=is_debug)
     def consume_main(
         data_ships: Iterable[Tuple[os.PathLike]],
         id_proc: int,
         output_dir: os.PathLike,
         num_proc: int,
-        suffix: str = "_time_" + time.strftime("%Y%m%d%H%M%S"),
+        suffix: str,
         **kwargs,
     ):
         """
@@ -258,5 +249,6 @@ def consumer(
         id_proc=id_proc,
         num_proc=num_proc,
         output_dir=output_dir,
+        suffix=suffix,
         **kwargs,
     )
