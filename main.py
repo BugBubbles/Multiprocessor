@@ -1,7 +1,62 @@
-from classify_book.processor import producer, consumer
+from multiprocessor.processor import producer, consumer
 import argparse
 import warnings
-import importlib
+
+
+def sinprocessor(file_dir, file_suffix, **kwargs):
+    """这是已经被分割后的list：`file_dir`"""
+    from classify_book.executor.single_executor import (
+        SingleExecutor as single_executor,
+    )
+
+    worker = single_executor()
+    worker.load_producer(
+        producer=producer,
+        file_suffix=file_suffix,
+        file_dir=file_dir,
+    )
+    worker.load_consumer(consumer)
+    worker()
+
+
+def multiprocessor(
+    file_dir,
+    num_consumer,
+    num_producer,
+    max_size,
+    file_suffix,
+    cache_size,
+    output_dir,
+    **kwargs
+):
+    from multiprocessor.executor.multiple_executor import (
+        MultipleExecutor as multi_executor,
+    )
+
+    try:
+        assert num_consumer and num_producer and max_size
+    except:
+        warnings.warn(
+            "No num_consumer, num_producer or max_size arguments is found, using the default value",
+            DeprecationWarning,
+        )
+    with multi_executor(
+        num_producer=num_producer,
+        num_consumer=num_consumer,
+        max_size=max_size,
+    ) as worker:
+        worker.load_producer(
+            producer=producer,
+            file_dir=file_dir,
+            file_suffix=file_suffix,
+            batch_size=cache_size,
+        )
+        # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
+        worker.load_consumer(
+            consumer=consumer,
+            output_dir=output_dir,
+        )
+        worker()
 
 def multiprocessor():
         from classify_book.executor.multiple_executor import (
@@ -109,47 +164,16 @@ if __name__ == "__main__":
         raise AttributeError(
             "No file_dir or output_dir is specified. Please check your input command line for '-f' and '-o' arguments."
         )
-    file_suffix = args.file_suffix
-    if not args.multiple_enable:
-        from classify_book.executor.single_executor import (
-            SingleExecutor as single_executor,
-        )
-
-        worker = single_executor()
-        worker.load_producer(
-            producer=producer,
-            file_suffix=file_suffix,
-        )
-        worker.load_consumer(consumer)
-        worker()
+    file_dir = args.__dict__.pop("file_dir")
+    if not args.mpi:
+        if not args.multiple_enable:
+            sinprocessor(file_dir=file_dir, **args.__dict__)
+        else:
+            multiprocessor(file_dir=file_dir, **args.__dict__)
     else:
-        from classify_book.executor.multiple_executor import (
-            MultipleExecutor as multi_executor,
-        )
+        from .distributor import MpichDistributor as mpich_distributor
 
-        try:
-            assert args.num_consumer and args.num_producer and args.max_size
-        except:
-            warnings.warn(
-                "No num_consumer, num_producer or max_size arguments is found, using the default value",
-                DeprecationWarning,
-            )
-        with multi_executor(
-            num_producer=args.num_producer,
-            num_consumer=args.num_consumer,
-            max_size=args.max_size,
-        ) as worker:
-            worker.load_producer(
-                producer=producer,
-                file_dir=args.file_dir,
-                file_suffix=file_suffix,
-                batch_size=args.cache_size,
-            )
-            # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
-            worker.load_consumer(
-                consumer=consumer,
-                output_dir=args.output_dir,
-            )
-            worker()
-
-    # worker()
+        if not args.multiple_enable:
+            mpich_distributor.run(sinprocessor, file_dir, **args.__dict__)
+        else:
+            mpich_distributor.run(multiprocessor, file_dir, **args.__dict__)
