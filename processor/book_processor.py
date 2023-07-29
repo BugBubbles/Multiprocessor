@@ -80,7 +80,7 @@ def producer(
         file_dir: os.PathLike,
         file_suffix: str,
         num_proc: int,
-        batch_size: int = 300,
+        batch_size: int,
         *args,
         **kwargs,
     ) -> Generator[Iterable[Tuple[Dict, str]], Iterable, Iterable]:
@@ -106,7 +106,15 @@ def producer(
 
         yield from generator_batch(file_path_generator, batch_size=batch_size)
 
-    return produce_main(id_proc=id_proc, num_proc=num_proc, *args, **kwargs)
+    return produce_main(
+        id_proc=id_proc,
+        num_proc=num_proc,
+        file_dir=file_dir,
+        file_suffix=file_suffix,
+        batch_size=batch_size,
+        *args,
+        **kwargs,
+    )
 
 
 class BookCategory(str):
@@ -246,5 +254,9 @@ def consumer(
                 print(file_path, file=writer, flush=True)
 
     return consume_main(
-        data_ships=data_ships, id_proc=id_proc, num_proc=num_proc, **kwargs
+        data_ships=data_ships,
+        id_proc=id_proc,
+        num_proc=num_proc,
+        output_dir=output_dir,
+        **kwargs,
     )

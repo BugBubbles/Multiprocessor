@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="multiprocessor",
+    name="Multiprocessor",
     version="2.0.0",
     author="Tschen Boffee",
     include_package_data=True,

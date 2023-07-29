@@ -41,7 +41,7 @@ def producer_typer(is_debug: bool = False, **kwargs):
                     print_error(
                         f"ERROR IN PROCESSOR {id_proc}:{warpper.__name__}",
                         "{}".format(time.strftime("%Y-%m-%d-%H:%M:%S")),
-                        deco="=",
+                        deco="*",
                     )
                     traceback.print_exception(
                         etype=exc.__class__, value=exc, tb=exc.__traceback__
