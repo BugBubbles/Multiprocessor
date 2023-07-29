@@ -4,11 +4,28 @@ from ..executor import Executor
 
 
 class DistributorBase:
-    def __init__(self, *dist_args, **dist_kwargs) -> None:
-        pass
+    # def __init__(self, *dist_args, **dist_kwargs) -> None:
+    #     pass
 
     @staticmethod
     def __call__(
+        call_func: Callable[[List[Any], Any], Any],
+        *distributable_args: List,
+        **fn_kwargs,
+    ):
+        """
+        Using a mpich executor to callback `call_func` function in paralleled processing nodes.
+        ### Arguments:
+         - `call_func` : A callable function that accept at least one list like arguments.
+         - `distributable_args` : serializable and position arguments, you should pre-divide these arguments and store them in different `list` like variables (`numpy.ndarray`, `Set`, `Tuple` and `dict` are also supported, all the supported types you can use are now being presented in https://mpi4py.readthedocs.io/en/stable/tutorial.html)
+         - `fn_kwargs` : `call_func` keyword arguments.
+        ### Usage
+        You can use this method without instance this `Distributor` class, the final output will be gather into the root machine (rank = 0).
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def run(
         call_func: Callable[[List[Any], Any], Any],
         *distributable_args: List,
         **fn_kwargs,
