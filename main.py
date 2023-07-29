@@ -1,6 +1,7 @@
 from Multiprocessor.processor import producer, consumer
 import argparse
 import warnings
+import os
 
 
 def sinprocessor(
@@ -27,13 +28,13 @@ def sinprocessor(
 
 def multiprocessor(
     file_dir,
+    input_file_path_list,
     num_consumer,
     num_producer,
     max_size,
     file_suffix,
     cache_size,
     is_debug,
-    input_file_path_list,
     output_dir,
     **kwargs,
 ):
@@ -143,11 +144,18 @@ if __name__ == "__main__":
             "No file_dir or output_dir is specified. Please check your input command line for '-f' and '-o' arguments."
         )
     file_dir = args.__dict__.pop("file_dir")
+    file_list = [
+        os.path.join(file_dir, file_name) for file_name in os.listdir(file_dir)
+    ]
     if not args.mpi:
         if not args.multiple_enable:
-            sinprocessor(file_dir=file_dir, **args.__dict__)
+            sinprocessor(
+                file_dir=file_dir, input_file_path_list=file_list, **args.__dict__
+            )
         else:
-            multiprocessor(file_dir=file_dir, **args.__dict__)
+            multiprocessor(
+                file_dir=file_dir, input_file_path_list=file_list, **args.__dict__
+            )
     else:
         from Multiprocessor.distributor import MpichDistributor as mpich_distributor
         import itertools
@@ -166,9 +174,17 @@ if __name__ == "__main__":
 
         if not args.multiple_enable:
             mpich_distributor.run(
-                sinprocessor, file_dir, div_funcs=[div_func], **args.__dict__
+                sinprocessor,
+                file_dir,
+                div_funcs=[div_func],
+                input_file_path_list=file_list,
+                **args.__dict__,
             )
         else:
             mpich_distributor.run(
-                multiprocessor, file_dir, div_funcs=[div_func], **args.__dict__
+                multiprocessor,
+                file_dir,
+                div_funcs=[div_func],
+                input_file_path_list=file_list,
+                **args.__dict__,
             )
