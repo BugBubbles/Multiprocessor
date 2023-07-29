@@ -3,6 +3,35 @@ import argparse
 import warnings
 import importlib
 
+def multiprocessor():
+        from classify_book.executor.multiple_executor import (
+            MultipleExecutor as multi_executor,
+        )
+
+        try:
+            assert args.num_consumer and args.num_producer and args.max_size
+        except:
+            warnings.warn(
+                "No num_consumer, num_producer or max_size arguments is found, using the default value",
+                DeprecationWarning,
+            )
+        with multi_executor(
+            num_producer=args.num_producer,
+            num_consumer=args.num_consumer,
+            max_size=args.max_size,
+        ) as worker:
+            worker.load_producer(
+                producer=producer,
+                file_dir=args.file_dir,
+                file_suffix=file_suffix,
+                batch_size=args.cache_size,
+            )
+            # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
+            worker.load_consumer(
+                consumer=consumer,
+                output_dir=args.output_dir,
+            )
+            worker()
 
 def get_args() -> argparse.Namespace:
     parse = argparse.ArgumentParser()
