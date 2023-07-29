@@ -3,20 +3,22 @@ import argparse
 import warnings
 
 
-def sinprocessor(file_dir, file_suffix, **kwargs):
-    """这是已经被分割后的list：`file_dir`"""
+def sinprocessor(file_dir, file_suffix, is_debug, output_dir, **kwargs):
     from Multiprocessor.executor.single_executor import (
         SingleExecutor as single_executor,
     )
 
-    worker = single_executor()
-    worker.load_producer(
-        producer=producer,
-        file_suffix=file_suffix,
-        file_dir=file_dir,
-    )
-    worker.load_consumer(consumer)
-    worker()
+    with single_executor() as worker:
+        worker.load_producer(
+            producer=producer,
+            file_dir=file_dir,
+            file_suffix=file_suffix,
+            is_debug=is_debug,
+        )
+        worker.load_consumer(
+            consumer=consumer, output_dir=output_dir, is_debug=is_debug
+        )
+        worker()
 
 
 def multiprocessor(
@@ -26,6 +28,7 @@ def multiprocessor(
     max_size,
     file_suffix,
     cache_size,
+    is_debug,
     output_dir,
     **kwargs
 ):
@@ -50,11 +53,11 @@ def multiprocessor(
             file_dir=file_dir,
             file_suffix=file_suffix,
             batch_size=cache_size,
+            is_debug=is_debug,
         )
         # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
         worker.load_consumer(
-            consumer=consumer,
-            output_dir=output_dir,
+            consumer=consumer, output_dir=output_dir, is_debug=is_debug
         )
         worker()
 
@@ -89,8 +92,7 @@ def get_args() -> argparse.Namespace:
         help="Enable a multiple processing programme.",
     )
     parse.add_argument(
-        "--debug_enable",
-        "-de",
+        "--is_debug",
         action="store_true",
         help="Enable a debug supported mode for multiple processing programme.",
     )

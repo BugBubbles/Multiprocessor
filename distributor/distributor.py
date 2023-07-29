@@ -112,26 +112,6 @@ class DistributorBase:
     def executor_init_kwargs(self):
         return self._executor_init_kwargs
 
-    # def run(self, *args, **kwargs):
-    #     """
-    #     You should run this Executor based distributed processing programme with this method.
-    #     """
-    #     mtd = dir(self.executor_instance)
-    #     try:
-    #         assert "update" in mtd
-    #     except:
-    #         raise KeyError("No 'update' method is instanced.")
-    #     try:
-    #         assert self.divider and self.divider_kwargs
-    #         assert self.executor_instance and self.executor_init_kwargs
-    #     except Exception as exc:
-    #         print(
-    #             exc
-    #             + f"\n You must load divider and executor functions first, by applying function {__class__}.load_divider and {__class__}.load_executor."
-    #         )
-    #     del mtd
-    #     raise NotImplementedError
-
 
 class Distributor(DistributorBase):
     pass
