@@ -170,8 +170,7 @@ if __name__ == "__main__":
             )
     else:
         from Multiprocessor.distributor import MpichDistributor as mpich_distributor
-        import itertools
-        from random import shuffle
+        import random
 
         def div_func(file_paths, num_part: int, shuf: bool = False):
             """
@@ -179,23 +178,13 @@ if __name__ == "__main__":
             """
 
             def split_list(data_list, num_part):
-                now_sum_size = len(data_list)
-                now_size = now_sum_size // num_part
-                now_res = now_sum_size % num_part
-                if now_res != 0:
-                    now_size += 1
-                it = iter(data_list)
-                while batch := list(itertools.islice(it, now_size)):
-                    now_sum_size = len(data_list)
-                    now_size = now_sum_size // num_part
-                    now_res = now_sum_size % num_part
-                    if now_res != 0:
-                        now_size += 1
-
-                    yield batch
+                div = [[] for i in range(num_part)]
+                for i in range(len(data_list)):
+                    div[i % num_part].append(data_list[i])
+                return div
 
             if shuf:
-                file_paths = shuffle(file_paths)
+                file_paths = random.shuffle(file_paths)
             return [file_splits for file_splits in split_list(file_paths, num_part)]
 
         if not args.multiple_enable:

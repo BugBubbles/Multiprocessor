@@ -1,4 +1,3 @@
-# 可以像搭一个神经网络一样搭一个多进程程序，也要注意搭得太多了，反而会影响效率，两层就足够应付大多数情况了
 from typing import Any
 from ..utils.type_collector import DataShips
 from ..debugger import producer_typer, consumer_typer
