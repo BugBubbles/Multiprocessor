@@ -5,9 +5,16 @@ import os
 
 
 def sinprocessor(
-    file_dir, file_suffix, is_debug, output_dir, input_file_path_list, ip_proc, **kwargs
+    input_file_path_list,
+    *,
+    file_dir,
+    file_suffix,
+    is_debug,
+    output_dir,
+    ip_proc=0,
+    **kwargs,
 ):
-    """这是已经被分割后的list：`file_dir`"""
+    """这是已经被分割后的list：`input_file_path_list`"""
     from Multiprocessor.executor.single_executor import (
         SingleExecutor as single_executor,
     )
@@ -19,16 +26,18 @@ def sinprocessor(
             file_suffix=file_suffix,
             is_debug=is_debug,
             input_file_path_list=input_file_path_list,
+            ip_proc=ip_proc,
         )
         worker.load_consumer(
-            consumer=consumer, output_dir=output_dir, is_debug=is_debug
+            consumer=consumer, output_dir=output_dir, is_debug=is_debug, ip_proc=ip_proc
         )
-        worker(ip_proc)
+        worker()
 
 
 def multiprocessor(
-    file_dir,
     input_file_path_list,
+    *,
+    file_dir,
     num_consumer,
     num_producer,
     max_size,
@@ -36,13 +45,14 @@ def multiprocessor(
     cache_size,
     is_debug,
     output_dir,
-    ip_proc,
+    ip_proc=0,
     **kwargs,
 ):
     from Multiprocessor.executor.multiple_executor import (
         MultipleExecutor as multi_executor,
     )
 
+    print(input_file_path_list)
     try:
         assert num_consumer and num_producer and max_size
     except:
@@ -62,12 +72,13 @@ def multiprocessor(
             batch_size=cache_size,
             input_file_path_list=input_file_path_list,
             is_debug=is_debug,
+            ip_proc=ip_proc,
         )
         # 此处消费者函数可以省略输入文件，多进程管理器内部进行装载
         worker.load_consumer(
-            consumer=consumer, output_dir=output_dir, is_debug=is_debug
+            consumer=consumer, output_dir=output_dir, is_debug=is_debug, ip_proc=ip_proc
         )
-        worker(ip_proc)
+        worker()
 
 
 def get_args() -> argparse.Namespace:
@@ -163,10 +174,24 @@ if __name__ == "__main__":
         from random import shuffle
 
         def div_func(file_paths, num_part: int, shuf: bool = False):
+            """
+            The `file_paths` must be finitely iterable, so you should load it into the memory instead of a generator.
+            """
+
             def split_list(data_list, num_part):
-                batch_size = len(data_list) // num_part
+                now_sum_size = len(data_list)
+                now_size = now_sum_size // num_part
+                now_res = now_sum_size % num_part
+                if now_res != 0:
+                    now_size += 1
                 it = iter(data_list)
-                while batch := list(itertools.islice(it, batch_size)):
+                while batch := list(itertools.islice(it, now_size)):
+                    now_sum_size = len(data_list)
+                    now_size = now_sum_size // num_part
+                    now_res = now_sum_size % num_part
+                    if now_res != 0:
+                        now_size += 1
+
                     yield batch
 
             if shuf:
@@ -176,16 +201,16 @@ if __name__ == "__main__":
         if not args.multiple_enable:
             mpich_distributor.run(
                 sinprocessor,
-                file_dir,
+                file_list,
                 div_funcs=[div_func],
-                input_file_path_list=file_list,
+                file_dir=file_dir,
                 **args.__dict__,
             )
         else:
             mpich_distributor.run(
                 multiprocessor,
-                file_dir,
+                file_list,
                 div_funcs=[div_func],
-                input_file_path_list=file_list,
+                file_dir=file_dir,
                 **args.__dict__,
             )
