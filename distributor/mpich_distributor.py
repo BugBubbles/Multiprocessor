@@ -22,6 +22,7 @@ class MpichDistributor(DistributorBase):
         comm = mpi.COMM_WORLD
         size = comm.Get_size()
         rank = comm.Get_rank()
+        comm.Barrier()
         for distributable_arg in distributable_args:
             try:
                 assert len(distributable_arg) == size
@@ -70,6 +71,7 @@ class MpichDistributor(DistributorBase):
         comm = mpi.COMM_WORLD
         size = comm.Get_size()
         rank = comm.Get_rank()
+        comm.Barrier()
         if not div_funcs:
             for distributable_arg in distributable_args:
                 try:
@@ -79,21 +81,22 @@ class MpichDistributor(DistributorBase):
                         f"{distributable_arg.__name__} cannot be distributed into {size} nodes."
                     )
             distributed_args = list(
-                comm.scatter(distributable_arg, root=0)
-                for distributable_arg in distributable_args
+                distributable_arg[rank] for distributable_arg in distributable_args
             )
-            distributed_output = call_func(*distributed_args, **shared_kwargs)
+            distributed_output = call_func(
+                *distributed_args, ip_proc=rank, **shared_kwargs
+            )
         else:
             # for customized divide functions
             distributed_args = list(
-                comm.scatter(
-                    div_func(distributable_arg, num_part=size, **div_func_kwarg), root=0
-                )
+                div_func(distributable_arg, num_part=size, **div_func_kwarg)[rank]
                 for distributable_arg, div_func, div_func_kwarg in zip(
                     distributable_args, div_funcs, div_func_kwargs
                 )
             )
-            distributed_output = call_func(*distributed_args, **shared_kwargs)
+            distributed_output = call_func(
+                *distributed_args, ip_proc=rank, **shared_kwargs
+            )
         gathered_output = comm.gather(distributed_output, root=0)
         if rank == 0:
             print(

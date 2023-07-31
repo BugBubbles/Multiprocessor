@@ -5,7 +5,7 @@ import os
 
 
 def sinprocessor(
-    file_dir, file_suffix, is_debug, output_dir, input_file_path_list, **kwargs
+    file_dir, file_suffix, is_debug, output_dir, input_file_path_list, ip_proc, **kwargs
 ):
     """这是已经被分割后的list：`file_dir`"""
     from Multiprocessor.executor.single_executor import (
@@ -23,7 +23,7 @@ def sinprocessor(
         worker.load_consumer(
             consumer=consumer, output_dir=output_dir, is_debug=is_debug
         )
-        worker()
+        worker(ip_proc)
 
 
 def multiprocessor(
@@ -36,6 +36,7 @@ def multiprocessor(
     cache_size,
     is_debug,
     output_dir,
+    ip_proc,
     **kwargs,
 ):
     from Multiprocessor.executor.multiple_executor import (
@@ -66,7 +67,7 @@ def multiprocessor(
         worker.load_consumer(
             consumer=consumer, output_dir=output_dir, is_debug=is_debug
         )
-        worker()
+        worker(ip_proc)
 
 
 def get_args() -> argparse.Namespace:

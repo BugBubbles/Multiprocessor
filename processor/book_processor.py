@@ -1,6 +1,5 @@
 from ..utils import generator_batch, get_file_list_stream_id
 from typing import Generator, Dict, Tuple, Iterable, Any, List
-from ..utils.type_collector import DataShips
 from ..debugger import producer_typer, consumer_typer
 import os
 from ..utils import jaccard_similar, hard_similar
@@ -72,7 +71,6 @@ def producer(
     batch_size: int = 300,
     is_debug: bool = False,
     input_file_path_list: List = None,
-    *args,
     **kwargs,
 ):
     @producer_typer(is_debug=is_debug)
@@ -83,7 +81,6 @@ def producer(
         num_proc: int,
         batch_size: int,
         input_file_path_list: List = None,
-        *args,
         **kwargs,
     ) -> Generator[Iterable[Tuple[Dict, str]], Iterable, Iterable]:
         """
@@ -111,7 +108,6 @@ def producer(
         file_suffix=file_suffix,
         batch_size=batch_size,
         input_file_path_list=input_file_path_list,
-        *args,
         **kwargs,
     )
 
@@ -197,6 +193,7 @@ def consumer(
     num_proc: int,
     suffix: str = "_time_" + time.strftime("%Y%m%d%H%M%S"),
     is_debug: bool = False,
+    ip_proc: int = None,
     **kwargs,
 ):
     @consumer_typer(is_debug=is_debug)
@@ -204,8 +201,8 @@ def consumer(
         data_ships: Iterable[Tuple[os.PathLike]],
         id_proc: int,
         output_dir: os.PathLike,
-        num_proc: int,
         suffix: str,
+        ip_proc: int,
         **kwargs,
     ):
         """
@@ -217,6 +214,8 @@ def consumer(
         #### Optionally NEEDED Arguments:
          - 'iter_deco' : a decorator for each consumer visualize iteration process.
         """
+        if ip_proc != None:
+            suffix += f"_ip_{ip_proc:03d}"
         category = Books(output_dir=output_dir, id_proc=id_proc, suffix=suffix)
 
         def meta_parse(metadata: Dict, file_path: os.PathLike) -> os.PathLike:
@@ -250,5 +249,6 @@ def consumer(
         num_proc=num_proc,
         output_dir=output_dir,
         suffix=suffix,
+        ip_proc=ip_proc,
         **kwargs,
     )

@@ -2,6 +2,7 @@ from .executor import ExecutorBase
 import multiprocessing as mp
 import time
 import warnings
+import socket
 
 
 class MultipleExecutor(ExecutorBase):
@@ -37,27 +38,32 @@ class MultipleExecutor(ExecutorBase):
         self.producer_initial_kwargs = producer_initial_kwargs
 
     def _produce(
-        self, id_proc: int, num_proc: int, iter_deco: str = "=", **producer_kwargs
+        self,
+        id_proc: int,
+        num_proc: int,
+        ip_proc: int,
+        iter_deco: str = "=",
+        **producer_kwargs,
     ) -> None:
         print(
             "\n"
             + f"{iter_deco}" * 10
-            + f" Produce process {id_proc:03d}:{__name__} is now working "
+            + f" Produce process <IP INDEX {ip_proc:03d}> {id_proc:03d} is now working "
             + f"{iter_deco}" * 10
         )
         for ships in self.producer(
-            id_proc=id_proc, num_proc=num_proc, **producer_kwargs
+            id_proc=id_proc, num_proc=num_proc, ip_proc=ip_proc, **producer_kwargs
         ):
             while self.quene.full():
                 print(
-                    f"\nQuene is full, read process {id_proc:03d}:{__name__} now rests..."
+                    f"\nQuene is full, read process <IP INDEX {ip_proc:03d}> {id_proc:03d} now rests..."
                 )
                 time.sleep(10)
             self.quene.put(ships)
             print(
                 "\n"
                 + f"{iter_deco}" * 10
-                + f" Produce process {id_proc:03d}:{__name__} is temporarily finished, waiting for next loop "
+                + f" Produce process <IP INDEX {ip_proc:03d}> {id_proc:03d} is temporarily finished, waiting for next loop "
                 + f"{iter_deco}" * 10
             )
         i = 0
@@ -69,17 +75,22 @@ class MultipleExecutor(ExecutorBase):
                     i += 1
         print(
             f"\n+++++++++++++++++++++++++++++++++++>>>>>>>>>>>>>>>>>>>>\n\
-Produce process {id_proc:03d}:{__name__} terminates\n\
+Produce process <IP INDEX {ip_proc:03d}> {id_proc:03d}:{__name__} terminates\n\
 <<<<<<<<<<<<<<<<<<<<<+++++++++++++++++++++++++++++++++++"
         )
 
     def _consume(
-        self, id_proc: int, num_proc: int, iter_deco: str = "|", **consumer_kwargs
+        self,
+        id_proc: int,
+        num_proc: int,
+        ip_proc: int,
+        iter_deco: str = "|",
+        **consumer_kwargs,
     ) -> None:
         print(
             "\n"
             + f"{iter_deco}" * 10
-            + f" Consume process {id_proc:03d}:{__name__} is now working "
+            + f" Consume process <IP INDEX {ip_proc:03d}> {id_proc:03d} is now working "
             + f"{iter_deco}" * 10
         )
         while True:
@@ -90,22 +101,27 @@ Produce process {id_proc:03d}:{__name__} terminates\n\
                 data_ships=ships,
                 id_proc=id_proc,
                 num_proc=num_proc,
+                ip_proc=ip_proc,
                 **consumer_kwargs,
             )
             print(
                 "\n"
                 + f"{iter_deco}" * 10
-                + f" Consume process {id_proc:03d}:{__name__} finishes, waiting for next loop "
+                + f" Consume process <IP INDEX {ip_proc:03d}> {id_proc:03d} finishes, waiting for next loop "
                 + f"{iter_deco}" * 10
             )
 
         print(
             f"\n------------------------------------>>>>>>>>>>>>>>>>>>>>\n\
-Consume process {id_proc:03d}:{__name__} terminates\n\
+Consume process <IP INDEX {ip_proc:03d}> {id_proc:03d}:{__name__} terminates\n\
 <<<<<<<<<<<<<<<<<<<<<----------------------------------"
         )
 
-    def __call__(self, **kwargs):
+    def __call__(self,  **kwargs):
+        """
+        ### Arguments:
+        DEPRECATED  - `ip_proc` : the ip index of temporarily executing processor.
+        """
         try:
             assert self.producer and self.producer_kwargs
             assert self.consumer and self.consumer_kwargs
@@ -114,6 +130,8 @@ Consume process {id_proc:03d}:{__name__} terminates\n\
                 exc
                 + f"\n You must load producers and consumers functions first, by applying function {__class__}.load_producer and {__class__}load_consumer."
             )
+        hostname = socket.gethostname()
+        ipv4 = socket.gethostbyname(hostname)
         producer_pool = mp.Pool(
             processes=self.num_producer, **self.producer_initial_kwargs
         )
@@ -124,7 +142,9 @@ Consume process {id_proc:03d}:{__name__} terminates\n\
             producer_pool.apply_async(
                 func=self._produce,
                 kwds=dict(
-                    id_proc=id_proc, num_proc=self.num_producer, **self.producer_kwargs
+                    id_proc=id_proc,
+                    num_proc=self.num_producer,
+                    **self.producer_kwargs,
                 ),
                 **kwargs,
             )
@@ -143,10 +163,13 @@ Consume process {id_proc:03d}:{__name__} terminates\n\
 
         producer_pool.join()
         consumer_pool.join()
+
+        now_time = time.strftime("%Y/%m/%d|%H:%M:%S")
         print(
             "=================================//////////////////////////\n\
-All the processors terminate, exit the main process.Now is {}.\n\
+All the processors terminate, exit the main process. \n\
+This is {}-{}. Now is {}.\n\
 //////////////////////////=================================".format(
-                time.strftime("%Y/%m/%d|%H:%M:%S")
+                hostname, ipv4, now_time
             )
         )
